@@ -2,19 +2,33 @@ package com.mongodb.SunLabs;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import static com.mongodb.SunLabs.Collection.*;
 
 public class Swing {
+
     public static void main(String[] args) {
+        System.out.println(new Timestamp(new Date().getTime()));
+        MongoCollection<Document> coll = Collection.getCollection("Users");
         JFrame fin=new JFrame("SunLabs Sign In");//creating instance of JFrame
         JDialog guiDialog = new JDialog();
         JFrame fadmin = new JFrame("SunLabs Admin GUI");
         DefaultTableModel model;
-
+        //Card Reader Input Frame
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         fin.setSize(1440, 900);//400 width and 500 height
         fin.setLayout(null);//using no layout managers
         fin.setVisible(true);//making the frame visible
@@ -46,17 +60,22 @@ public class Swing {
                 //if user, upload to database the id and timestamp
                 //if admin, upload to database ^, then offer popup to open gui
                 //if not accepted,clear the textfield
-                //if accepted, close fin, then open fadmin
-
+                //if accepted, clear textfield, then open fadmin
 
                 String idString = readerTF.getText();
+
                 // send value to database
 
 
-                if(idString.substring(0,2).equalsIgnoreCase("A%")){
-                    //create popup prompting to go to GUI
+                if(!idString.isEmpty() && idString.substring(0,2).equalsIgnoreCase("A%")){
                     guiDialog.setVisible(true);
                     fin.setVisible(false);
+                    Document document = new Document().append("_id",new ObjectId()).append("UserId",readerTF.getText()).append("TimeStamp",new Timestamp(new Date().getTime()));
+                    insertADocIntoDb(coll,document);
+                }
+                else if(!idString.isEmpty()){
+                    Document document = new Document().append("_id",new ObjectId()).append("UserId",readerTF.getText()).append("TimeStamp",new Timestamp(new Date().getTime()));
+                    insertADocIntoDb(coll,document);
                 }
 
             }
@@ -66,7 +85,7 @@ public class Swing {
 
 
 
-
+        //Pop Up
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         guiDialog.setSize(720,480);
@@ -100,17 +119,21 @@ public class Swing {
 
         guiDialog.setLayout(null);//using no layout managers
 
-
+        //Admin Frame
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        fadmin.setSize(1440, 900);//400 width and 500 height
-        fadmin.setLayout(null);//using no layout managers
+        fadmin.setLayout(new GridLayout(0,1));//using no layout managers
 
-        MongoCollection<Document> coll = Collection.getCollection("ID");
 
-        JTable tableDB = new JTable(); // need to fill database info
-        tableDB.setBounds(300,200,400,300);
-        fadmin.add(tableDB);
+
+
+        String data[][] = {{"1","1"},{"!","@"}};
+        String column[] = {"UserId","Timestamp"};
+        JTable tableDB = new JTable(data,column); // need to fill database info
+        JScrollPane spTable = new JScrollPane(tableDB);
+
+        fadmin.add(spTable);
+        fadmin.setSize(1440, 900);
     }
 }

@@ -1,15 +1,21 @@
 package com.mongodb.SunLabs;
 
+import com.mongodb.MongoCredential;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.mongodb.SunLabs.ConnectionDB.*;
+import static com.mongodb.client.model.Filters.lt;
+
+
 
 
 public class Collection {
@@ -19,10 +25,11 @@ public class Collection {
         try {
             // establishConnections() Code
             // is defined above
-            establishConnections();
-            MongoClient db = MongoClients.create("mongodb+srv://cluster0.tllz1of.mongodb.net/MyDatabase");
+
+            MongoClient db = MongoClients.create("mongodb+srv://<Program>:<programPassword>@cluster0.tllz1of.mongodb.net/SunLabsSignIn");
+
             // Get the database instance
-            MongoDatabase database = db.getDatabase("MyDatabase");
+            MongoDatabase database = db.getDatabase("SunLabsSignIn");
 
             // Create the collection
             database.createCollection(collectionName);
@@ -42,10 +49,12 @@ public class Collection {
         try {
             // establishConnections() Code
             // is defined above
-            establishConnections();
-            MongoClient db = MongoClients.create("mongodb+srv://cluster0.tllz1of.mongodb.net/MyDatabase");
+            String uri = "mongodb+srv://cluster0.tllz1of.mongodb.net/SunLabsSignIns";
+
+            MongoClient db = MongoClients.create(uri);
+
             // Get the database instance
-            MongoDatabase database = db.getDatabase("MyDatabase");
+            MongoDatabase database = db.getDatabase("SunLabsSignIns");
 
             // Retrieve the collection
             MongoCollection<Document> collection = database.getCollection(collectionName);
@@ -60,19 +69,11 @@ public class Collection {
         return null;
     }
 
-    public static void insertADocIntoDb(String collectionName)
+    public static void insertADocIntoDb(MongoCollection<Document> coll,Document document)
     {
         try {
-            // establishConnections() Code
-            // is defined above
-            establishConnections();
-
-            // Creating the document
-            // to be inserted
-            Document document = new Document("title", "MyDatabase").append("about", "Open-Source database");
-
             // Insert the document
-            getCollection(collectionName).insertOne(document);
+            coll.insertOne(document);
 
             System.out.println(
                     "Document inserted Successfully");
@@ -86,13 +87,11 @@ public class Collection {
 
     // Function to insert multiple
     // documents in to the MongoDB
-    public static void insertManyDocsIntoDb(String collectionName)
+    public static void insertManyDocsIntoDb(MongoCollection<Document> coll)
     {
         try {
             // establishConnections() Code
             // is defined above
-            establishConnections();
-
             // Creating the document
             // to be inserted
             Document document = new Document("title", "MongoDB").append("about", "Open-Source database");
@@ -104,7 +103,7 @@ public class Collection {
             dblist.add(document1);
 
             // Insert the list of documents into DB
-            getCollection(collectionName).insertMany(dblist);
+            coll.insertMany(dblist);
 
             System.out.println("Documents inserted Successfully");
         }
@@ -114,32 +113,38 @@ public class Collection {
         }
     }
 
-    public static void displayDocuments(String collectionName)
+    public static void displayDocuments(MongoCollection<Document> coll)
     {
 
         try {
             // establishConnections() Code
             // is defined above
-            establishConnections();
 
-            System.out.println("Displaying the list" + " of Documents");
+            MongoClient db = MongoClients.create("mongodb+srv://cluster0.tllz1of.mongodb.net/SunLabsSignIns");
 
-            // Get the list of documents from the DB
-            FindIterable<Document> iterobj = getCollection(collectionName).find();
+            // Get the database instance
+            MongoDatabase database = db.getDatabase("SunLabsSignIns");
+            MongoCollection<Document> collection = database.getCollection("Users");
+            System.out.println("Displaying the list of Documents");
 
-            // Print the documents using iterators
-            Iterator itr = iterobj.iterator();
-            while (itr.hasNext()) {
-                System.out.println(itr.next());
+            Bson projectionFields = Projections.fields(Projections.include("x"),Projections.excludeId());
+
+            MongoCursor<Document> cursor = collection.find(lt("runtime",15)).projection(projectionFields).sort(Sorts.descending("x")).iterator();
+            try{
+                while(cursor.hasNext()){
+                    System.out.println(cursor.next().toJson());
+                }
+            }finally{
+                cursor.close();
             }
         }
         catch (Exception e) {
-            System.out.println("Could not find the documents " + "or No document exists");
+            System.out.println("Could not find the documents or No document exists");
             System.out.println(e);
         }
     }
-
-    public static void updateDocuments(String collectionName)
+/*
+    public static void updateDocuments(MongoCollection<Document> coll)
     {
 
         try {
@@ -151,9 +156,7 @@ public class Collection {
             // Get the database instance
             MongoDatabase database = db.getDatabase("MyDatabase");
 
-            MongoCollection<Document> collection = database.getCollection("collectionName");
-
-            collection.updateOne(Filters.eq("title", "MongoDB"), Updates.set("about", "Database"));
+            coll.updateOne(Filters.eq("title", "MongoDB"), Updates.set("about", "Database"));
 
             System.out.println("Successfully updated" + " the document");
         }
@@ -163,7 +166,7 @@ public class Collection {
         }
     }
 
-    public static void deleteDocuments(String collectionName)
+    public static void deleteDocuments(MongoCollection<Document> coll)
     {
 
         try {
@@ -175,9 +178,7 @@ public class Collection {
             // Get the database instance
             MongoDatabase database = db.getDatabase("MyDatabase");
 
-            MongoCollection<Document> collection = database.getCollection(collectionName);
-
-            collection.deleteOne(Filters.eq("title", "Open-Source Database"));
+            coll.deleteOne(Filters.eq("title", "Open-Source Database"));
             System.out.println("Successfully deleted" + " the document");
         }
         catch (Exception e) {
@@ -185,5 +186,5 @@ public class Collection {
             System.out.println(e);
         }
     }
-
+*/
 }
