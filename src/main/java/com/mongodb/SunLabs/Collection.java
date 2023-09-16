@@ -1,6 +1,6 @@
 package com.mongodb.SunLabs;
 
-import com.mongodb.MongoCredential;
+import com.mongodb.*;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
@@ -19,15 +19,11 @@ import static com.mongodb.client.model.Filters.lt;
 
 
 public class Collection {
-    public static void createCollection(String collectionName)
-    {
-
+    public static void createCollection(String collectionName) {
         try {
             // establishConnections() Code
             // is defined above
-
-            MongoClient db = MongoClients.create("mongodb+srv://<Program>:<programPassword>@cluster0.tllz1of.mongodb.net/SunLabsSignIn");
-
+            MongoClient db = MongoClients.create("mongodb+srv://cluster0.tllz1of.mongodb.net/");
             // Get the database instance
             MongoDatabase database = db.getDatabase("SunLabsSignIn");
 

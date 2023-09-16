@@ -126,7 +126,7 @@ public class Swing {
         fadmin.setLayout(new GridLayout(0,1));//using no layout managers
 
 
-
+        createCollection("test");
 
         String data[][] = {{"1","1"},{"!","@"}};
         String column[] = {"UserId","Timestamp"};
